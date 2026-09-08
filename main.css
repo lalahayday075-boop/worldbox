@@ -1,0 +1,438 @@
+/* WORLD SIMULATOR — FILE RULES
+ * 1) Keep this file in the flattened project root/relative path when packaging; never add a second project-folder layer.
+ * 2) Preserve responsive/mobile layout and avoid fixed widths that can overflow the settings panel.
+ * 3) Settings choices must visually support exactly one active option per setting row.
+ * 4) Prefer reusable classes over one-off inline styles.
+ * 5) Keep this header at the top of the file when making future edits.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   THEME — "Cartographer's Atlas": the chrome around the map is
+   built like a well-worn atlas on a desk — aged parchment, ink,
+   wax seals and brass fittings — so it sits comfortably with the
+   warm, hand-drawn terrain/building art already on the canvas
+   instead of fighting it with a cool dark SaaS dashboard.
+   ============================================================ */
+:root{
+  --parchment:#efdfba;       /* base paper — buttons, panels, docks */
+  --parchment-2:#e3cd9a;     /* deeper paper — header strips, tab rails */
+  --parchment-deep:#cdac72;  /* aged edge tone — borders, pressed states */
+  --ink:#2e2013;             /* primary text — warm near-black */
+  --ink-soft:#6b573a;        /* secondary/muted text */
+  --wood:#241a12;            /* espresso — dark chrome (tool tray, topbar) */
+  --wood-2:#3a2917;          /* lighter wood, gradients */
+  --gold:#a97a2c;            /* leaf-gold accent — borders, active states */
+  --gold-bright:#e0ab52;     /* hover / lit gold */
+  --wax:#7a2420;             /* sealing-wax red — close button, danger */
+  --wax-bright:#9c3630;
+  --sage:#57643c;            /* secondary accent — territory / nature */
+  --sage-bright:#79895a;
+  --muted:#6b573a;
+  --text:#2e2013;
+  --line:#00000024;
+  --panel-border:#00000030;
+  --radius-lg:16px;
+  --radius-md:11px;
+  --radius-sm:8px;
+  --shadow-lift:0 18px 36px #0000004f, 0 4px 10px #00000038;
+  --shadow-soft:0 6px 16px #00000030;
+  --paper-grain:
+    radial-gradient(circle at 15% 20%, #00000009 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, #00000008 0%, transparent 50%),
+    radial-gradient(circle at 50% 95%, #ffffff14 0%, transparent 40%);
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--wood);color:var(--text);
+  font-family:'Noto Serif Thai','Noto Serif',Georgia,serif;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px}
+#app,#game{display:block;width:100%;height:100%}
+#game{touch-action:none;image-rendering:auto}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:fixed;z-index:3;left:0;right:0;top:0;min-height:36px;
+  padding:calc(10px + var(--safe-t)) calc(18px + var(--safe-r)) 16px calc(18px + var(--safe-l));
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  background:linear-gradient(#1b130ded,#1b130db8 60%,transparent);
+  pointer-events:none;
+}
+.brand span{display:block;font-size:10px;color:#d8c6a0;font-weight:500;letter-spacing:.01em}
+.stats{display:flex;gap:14px;font-size:13px;padding:6px 14px;white-space:nowrap;
+  background:var(--parchment);color:var(--ink);border:1px solid var(--panel-border);border-radius:999px;
+  box-shadow:var(--shadow-soft);background-image:var(--paper-grain)}
+.stats span{display:inline-flex;gap:5px;align-items:center;font-variant-numeric:tabular-nums}
+.stats b{font-weight:700;color:var(--wax)}
+
+/* ---------- Shared floating controls ----------
+   New World / Events / Dashboard used to live in a left-dock up here —
+   they've moved down into the bottom tool dock's normal-mode row (see
+   the "Bottom tool dock" section), so the minimap dock now sits higher,
+   closer to the top of the screen, where that left-dock used to start. */
+.right-dock{position:fixed;z-index:3;top:calc(46px + var(--safe-t));right:calc(12px + var(--safe-r));
+  display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+
+/* ---------- FPS counter badge ----------
+   Lives at the top of the right-dock, under the topbar's stats pill and
+   flush with the minimap below it, instead of the old canvas-drawn
+   top-left readout that used to sit underneath (and get covered by) the
+   date/stats bar. Same pill styling as .stats so it reads as part of the
+   same HUD family. */
+.fps-badge{padding:5px 12px;border-radius:999px;font-size:11.5px;font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;white-space:nowrap;
+  background:rgba(13,20,29,.74);color:#8ee89a;box-shadow:var(--shadow-soft);
+  pointer-events:none;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.fps-badge.hidden{display:none}
+
+.brush-control{
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 10px;
+  border:1px solid var(--panel-border);width:150px;
+  border-radius:999px;background:var(--parchment);background-image:var(--paper-grain);color:var(--ink);
+  font-size:11.5px;font-weight:600;box-shadow:var(--shadow-soft)
+}
+.brush-control input{flex:1;min-width:0;accent-color:var(--gold)}
+.brush-control b{min-width:11px;text-align:center;color:var(--wax)}
+
+/* ---------- Minimap ---------- */
+#minimap{width:150px;height:94px;display:block;border:3px solid var(--gold);border-radius:6px;
+  background:#0b0f16;box-shadow:var(--shadow-lift),inset 0 0 0 1px #00000060;cursor:pointer;image-rendering:pixelated}
+
+/* ---------- Zoom controls ----------
+   Sits under the minimap so zoom is reachable by tap/click/keyboard even
+   on devices without a wheel or pinch gesture (mouse wheel and touch
+   pinch still work directly on the canvas — see main.js). */
+.zoom-controls{display:flex;gap:8px}
+.zoom-controls button{width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--panel-border);background:var(--parchment);background-image:var(--paper-grain);
+  color:var(--ink);font-size:19px;font-weight:700;line-height:1;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+.zoom-controls button:active{transform:scale(.92)}
+
+/* ---------- Paused banner ---------- */
+.paused-banner{position:fixed;z-index:7;left:50%;top:calc(14px + var(--safe-t));transform:translateX(-50%);
+  padding:7px 18px;border-radius:999px;background:var(--parchment);border:1px solid var(--gold);color:var(--wax);
+  font-size:12px;font-weight:700;letter-spacing:.03em;pointer-events:none;box-shadow:var(--shadow-soft)}
+
+/* ---------- Modal overlay (shared by info panel + dashboard) ----------
+   Both popups live inside their own full-screen overlay and are centered
+   with flexbox. The close button is NOT part of either popup — it's a
+   single wax-seal element pinned straight to the viewport corner (see
+   .modal-close-btn below) so it never travels with a popup's position,
+   size, or animation and stays tappable no matter what's on screen. */
+.modal-overlay{
+  position:fixed;inset:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(30px + var(--safe-t)) calc(30px + var(--safe-r)) calc(30px + var(--safe-b)) calc(30px + var(--safe-l));
+  background:radial-gradient(ellipse at 50% 30%,#3a291799,#100b06f2);backdrop-filter:blur(3px);
+  animation:overlay-in .16s ease-out;
+}
+.modal-overlay.hidden{display:none}
+@keyframes overlay-in{from{opacity:0}to{opacity:1}}
+
+.modal-close-btn{
+  position:fixed;z-index:50;top:calc(20px + var(--safe-t));right:calc(20px + var(--safe-r));
+  width:42px;height:42px;padding:0;border:2px solid var(--gold);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--wax-bright),var(--wax) 70%);color:#f4e6c4;font-size:20px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-lift),inset 0 1px 0 #ffffff30;transition:transform .1s,filter .15s;
+}
+.modal-close-btn:hover{filter:brightness(1.12)}
+.modal-close-btn:active{transform:scale(.9)}
+.modal-close-btn.hidden{display:none}
+
+/* ---------- Info panel (fixed-size centered popup) ----------
+   Width/height are derived only from viewport size (vw/vh + a px cap) —
+   never from content — so switching between a unit/city/kingdom/tile,
+   or a body with more or less text, never changes the popup's footprint.
+   Content that doesn't fit scrolls inside .panel-body instead. */
+.panel{
+  position:relative;z-index:41;
+  width:min(92vw,560px);height:min(82vh,600px);
+  display:flex;flex-direction:column;
+  padding:22px 24px 24px;
+  border:1px solid var(--panel-border);border-radius:var(--radius-lg);
+  background:var(--parchment);background-image:var(--paper-grain);
+  box-shadow:var(--shadow-lift),inset 0 0 0 6px #00000010,inset 0 0 0 7px var(--parchment-deep);
+  animation:panel-in .18s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes panel-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes pop-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.panel h3{margin:0 0 14px;font-family:'Cinzel',serif;font-size:21px;font-weight:700;color:var(--ink);
+  flex:0 0 auto;padding-bottom:10px;border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:10px}
+.panel-back-btn{flex:0 0 auto;width:30px;height:30px;line-height:28px;text-align:center;padding:0;
+  border-radius:50%;border:1px solid #00000030;background:var(--parchment-2);color:var(--ink);
+  font-size:16px;font-family:inherit}
+.panel .panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-right:6px;margin-right:-6px}
+.panel p{margin:11px 0;color:var(--ink);font-size:14.5px;line-height:1.6}
+.subtle{color:var(--ink-soft);font-size:12.5px;font-style:italic}
+.panel .section{margin-top:16px;padding-top:12px;border-top:1px dashed var(--parchment-deep)}
+.panel .section:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.panel .section-title{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--gold)}
+.panel .kv{display:flex;flex-wrap:wrap;gap:3px 16px;margin:6px 0;font-size:13.5px;color:var(--ink)}
+.panel .kv b{color:var(--wax);font-weight:700}
+.newworld-row{display:flex;gap:8px}
+.settings-toggle-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;width:100%}
+.settings-toggle-btn{width:100%;min-width:0;min-height:42px;padding:8px 10px;border-radius:8px;border:1px solid #00000030;
+  background:var(--parchment-2);color:var(--ink);font:inherit;font-size:12px;font-weight:700;line-height:1.25;
+  white-space:normal;word-break:normal;text-align:center}
+.settings-toggle-btn.active{background:var(--gold);border-color:var(--gold-bright);color:#2a1c08}
+.newworld-row input[type=number]{flex:1 1 auto;min-width:0;font:inherit;font-size:15px;padding:8px 10px;
+  border-radius:6px;border:1px solid #00000030;background:#fffdf6;color:var(--ink)}
+.newworld-row button{flex:0 0 auto;width:42px;font-size:18px;border-radius:6px;border:1px solid #00000030;
+  background:var(--parchment-2);}
+.newworld-slider{width:100%;accent-color:var(--gold-bright);margin:4px 0}
+.newworld-actions{display:flex;flex-wrap:wrap;gap:10px}
+.save-slot-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 0;border-bottom:1px solid #00000018}
+.save-slot-row:last-child{border-bottom:none}
+.save-slot-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.save-slot-info b{color:var(--wax);font-size:14px}
+.save-slot-btns{display:flex;gap:6px;flex:0 0 auto}
+.save-slot-btn{flex:0 0 auto;font:inherit;font-size:13px;padding:7px 12px;border-radius:6px;
+  border:1px solid #00000030;background:var(--parchment-2);color:var(--ink)}
+.save-slot-btn.danger{background:var(--wax);border-color:var(--wax-bright);color:#f6e4cf}
+#save-name-input{font:inherit;font-size:15px;padding:8px 10px;border-radius:6px;width:100%;
+  border:1px solid #00000030;background:#fffdf6;color:var(--ink)}
+.newworld-actions button{flex:1 1 auto;padding:10px 8px;border-radius:8px;font-weight:700;font-size:13.5px;
+  border:1px solid #00000030;background:var(--parchment-2)}
+.newworld-actions button.danger{background:var(--wax);border-color:var(--wax-bright);color:#f6e4cf}
+.newworld-actions button.active{background:var(--gold);border-color:var(--gold-bright);color:#2a1c08}
+/* Graphics quality rows: each setting is its own heading line followed
+   by its option buttons wrapping onto as many lines as the panel width
+   needs. Replaces the old fixed-column grid, which forced every row
+   into one wide horizontally-scrolling strip (label + 7 tiny columns)
+   that ran off the edge of the screen on narrow phones instead of
+   wrapping. Now nothing is ever cut off — a row's buttons just flow
+   onto a second line when they don't fit on the first. */
+.gfx-custom-grid{display:flex;flex-direction:column;gap:14px;margin-top:4px;width:100%}
+.gfx-row{display:flex;flex-direction:column;gap:7px;width:100%}
+.gfx-row-label{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--gold);line-height:1.3}
+.gfx-row-buttons{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.gfx-row-buttons button{flex:1 1 72px;min-width:64px;max-width:100%;padding:9px 6px;border-radius:8px;
+  font-weight:700;font-size:11.5px;border:1px solid #00000030;background:var(--parchment-2);color:var(--ink)}
+.gfx-row-buttons button.active{background:var(--gold);border-color:var(--gold-bright);color:#2a1c08}
+.stat-bar{height:9px;border-radius:99px;background:#00000018;overflow:hidden;margin:5px 0 12px;
+  box-shadow:inset 0 1px 2px #00000030}
+.stat-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));
+  transition:width .4s ease;width:var(--pct,0%)}
+.hidden{display:none}
+.stat-label{margin-bottom:2px}
+.subtle--center{text-align:center}
+
+/* Small inline SVG icons dropped into text (resource/rank/building icons) —
+   baseline-align them like a text glyph instead of sitting on the text baseline. */
+.icon-inline{vertical-align:-4px}
+.icon-inline--auto{flex:0 0 auto}
+
+/* Generic layout utilities, used where a one-off inline style used to live. */
+.flex-1{flex:1}
+.input-full{width:100%}
+
+/* Tool tray group visibility: JS only toggles this class, CSS decides the
+   actual display value (a <button> needs flex for its icon+label layout,
+   any other element in the group just needs block). */
+.tools [data-group]{display:none}
+.tools [data-group].tool-group-visible{display:block}
+.tools button[data-group].tool-group-visible{display:flex}
+
+/* ---------- Civilization panel ---------- */
+.civ-hero{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;margin-bottom:14px;
+  background:linear-gradient(135deg,var(--parchment-2),var(--parchment));
+  border:1px solid var(--parchment-deep);box-shadow:inset 0 1px 0 #ffffff40}
+.civ-hero-icon{flex:0 0 auto;width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;border-radius:50%;background:var(--parchment);border:2px solid var(--gold);box-shadow:var(--shadow-soft)}
+
+/* Civilization/culture-era symbol (see cultureSymbolHTML in culture.js).
+   Renders an <img> pulled from images/culture/level-N.png when one exists.
+   If that file 404s — including when there's no images/ folder at all yet —
+   the inline onerror handler adds --fallback to the wrapper and these two
+   rules swap back to the original emoji glyph, so nothing looks different
+   until real artwork is dropped in. */
+.civ-symbol{display:inline-flex;align-items:center;justify-content:center;overflow:hidden;
+  width:var(--civ-symbol-size,20px);height:var(--civ-symbol-size,20px);vertical-align:middle}
+.civ-symbol-img{width:100%;height:100%;object-fit:contain}
+/* Emoji glyphs render noticeably larger than their declared font-size (the
+   color-emoji font's glyph box has extra built-in padding), so the fallback
+   text is scaled down relative to the wrapper to keep it from overflowing
+   its circle — most visible on the larger civ-hero-icon size. */
+.civ-symbol-fallback{display:none;font-size:calc(var(--civ-symbol-size,20px) * 0.7);line-height:1}
+.civ-symbol--fallback .civ-symbol-img{display:none}
+.civ-symbol--fallback .civ-symbol-fallback{display:inline}
+.civ-hero-info{flex:1 1 auto;min-width:0}
+.civ-hero-level{font-family:'Cinzel',serif;font-weight:700;font-size:19px;color:var(--wax);line-height:1.25}
+.civ-hero-level .subtle{font-size:13px;font-style:normal;font-weight:600}
+.civ-hero-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Hide the kingdom's gold total on the city panel's kingdom row — kept as
+   a hidden class (rather than removed from the template) so it's easy to
+   bring back later if needed. */
+.city-kingdom-gold{display:none}
+.civ-stats-row{display:flex;gap:10px;margin-bottom:4px}
+.civ-stat{flex:1 1 0;padding:9px 10px;border-radius:9px;background:#00000009;text-align:center}
+.civ-stat-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft)}
+.civ-stat-value{display:block;margin-top:3px;font-size:14.5px;font-weight:700;color:var(--ink)}
+.civ-progress-caption{display:flex;justify-content:space-between;margin:0 0 2px;font-size:12px;color:var(--ink-soft)}
+.civ-unlock-box{padding:10px 12px;border-radius:9px;margin:8px 0;font-size:13.5px;line-height:1.5}
+.civ-unlock-box.current{background:#4f7a3a1a;border:1px solid #4f7a3a40}
+.civ-unlock-box.current b{color:#3f6630}
+.civ-unlock-box.next{background:#00000009;border:1px dashed var(--parchment-deep);color:var(--ink-soft)}
+.civ-unlock-box.next b{color:var(--gold)}
+.civ-unlock-box p{margin:0}
+.civ-cta-btn{display:block;width:100%;margin-top:6px;padding:12px;border-radius:10px;font:inherit;
+  font-size:14.5px;font-weight:700;text-align:center;color:#f6e4cf;
+  background:linear-gradient(135deg,var(--wax-bright),var(--wax));border:1px solid var(--wax-bright);
+  box-shadow:var(--shadow-soft);transition:filter .15s,transform .1s}
+.civ-cta-btn:hover{filter:brightness(1.08)}
+.civ-cta-btn:active{transform:scale(.98)}
+
+/* ---------- Loading screen ---------- */
+/* Sits above absolutely everything (even modals) from first paint until
+   world generation + a short warm-up + a fixed settle delay are all done —
+   see main.js. Fades out rather than popping away so the reveal doesn't
+   itself look like a stutter. */
+.loading-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(circle at 50% 42%,var(--wood-2),var(--wood) 70%);
+  color:var(--parchment);
+  transition:opacity .5s ease;
+}
+.loading-screen.fade-out{opacity:0;pointer-events:none}
+.loading-emblem{font-size:40px;filter:drop-shadow(0 4px 10px #00000060)}
+.loading-spinner{
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid #00000000;
+  border-top-color:var(--gold-bright);border-right-color:var(--gold);
+  animation:loading-spin .9s linear infinite;
+}
+.loading-text{margin:0;font-size:13px;letter-spacing:.02em;color:var(--parchment-2)}
+@keyframes loading-spin{to{transform:rotate(360deg)}}
+
+/* ---------- Bottom tool dock ---------- */
+/* Wraps the category tabs and the tools grid in one fixed-position flex
+   column with no gap between them, so the tabs sit flush on top of the
+   grid as one seamless square-cornered block — no rounded corners
+   anywhere, and no gap-border between the two bars (tools' top border
+   is dropped so only the category bar's bottom edge shows). Flush
+   against the bottom, left, and right edges (safe-area insets aside)
+   to make full use of the screen. */
+.bottom-dock{
+  position:fixed;z-index:6;bottom:var(--safe-b);left:var(--safe-l);right:var(--safe-r);
+  display:flex;flex-direction:column;gap:0;
+}
+.tool-categories{
+  display:flex;gap:3px;padding:4px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  border:1px solid #00000060;border-radius:0;
+  background:linear-gradient(#3a2917,var(--wood));
+  box-shadow:var(--shadow-lift),inset 0 1px 0 #ffffff14;
+}
+.tool-categories::-webkit-scrollbar{display:none}
+.tool-categories button{
+  flex:1 1 0;min-width:0;padding:5px 3px;font-size:8.5px;font-weight:700;white-space:nowrap;border-radius:7px;
+  background:var(--parchment);background-image:var(--paper-grain);border:1px solid #00000050;color:var(--ink);
+  box-shadow:var(--shadow-soft);transition:background .15s,border-color .15s,transform .08s,box-shadow .15s;
+}
+.tool-categories button:hover{border-color:var(--gold);background:var(--parchment-2)}
+.tool-categories button:active{transform:scale(.94);box-shadow:0 2px 6px #0004}
+.tool-categories button.active{background:var(--gold);border-color:var(--gold-bright);color:#2a1c08;
+  box-shadow:0 0 0 1px #ffe9b355,var(--shadow-soft)}
+.tools{
+  /* Always exactly 2 rows: grid-auto-flow:column fills top row then
+     bottom row, then starts a new column. Columns have a fixed width
+     (grid-auto-columns) so buttons never shrink as more tools are added —
+     once there are more columns than fit in the dock's width, the whole
+     grid just scrolls horizontally instead (overflow-x below). Which
+     buttons even appear here depends on the active category tab above —
+     see updateToolGroups() in ui.js, which toggles inline display to
+     override the rule below. */
+  display:grid;grid-template-rows:repeat(2,1fr);grid-auto-flow:column;
+  grid-auto-columns:34px;gap:3px;
+  width:100%;padding:4px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  border:1px solid #00000060;border-top:none;border-radius:0;
+  background:linear-gradient(#3a2917,var(--wood));
+  box-shadow:var(--shadow-lift),inset 0 1px 0 #ffffff14;
+}
+/* Only the "normal" group (select/speed/save/load/...) is visible until
+   JS decides otherwise. Without this, every group's buttons sit in the
+   DOM visible-by-default and only get hidden once updateToolGroups()
+   runs — so on a slow load there's a flash of every tool at once before
+   it snaps to the right category, and if that script is ever delayed or
+   fails outright, it stays stuck showing everything. Baking the default
+   into CSS means the correct state is there from first paint no matter
+   what JS does later. */
+.tools [data-group]:not([data-group="normal"]){display:none}
+.tools::-webkit-scrollbar{display:none}
+/* Invisible filler column: reserves one full-height column of blank
+   space in the normal-mode row (between Load and New World) without
+   drawing anything, so those two clusters of buttons read as separate
+   groups instead of running together. */
+.tools-gap{grid-row:span 2;pointer-events:none}
+.tools button{background:var(--parchment);background-image:var(--paper-grain);border:1px solid #00000050;
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-soft);color:var(--ink);
+  transition:background .15s,border-color .15s,transform .08s,box-shadow .15s}
+.tools button:hover{border-color:var(--gold);background:var(--parchment-2)}
+.tools button:active{transform:scale(.94);box-shadow:0 2px 6px #0004}
+/* Selected-tool highlight, moved below :hover/:active above so it always
+   wins the cascade when both match (same specificity as :hover — the one
+   defined later wins). Mobile webviews often leave a button "stuck" in
+   :hover after a tap until something else is touched, which — when this
+   rule sat earlier in the file — let that pale hover color mask the
+   button's real gold highlight until the person tapped away and back.
+   The explicit :hover/:active variants below are extra insurance so the
+   gold highlight always shows even while a finger is still touching it. */
+.tools button.active,
+.tools button.active:hover,
+.tools button.active:active{background:var(--gold);border-color:var(--gold-bright);color:#2a1c08;
+  box-shadow:0 0 0 1px #ffe9b355,var(--shadow-soft)}
+.tools button.danger{border-color:var(--wax)}
+.tools button.danger:hover{border-color:var(--wax-bright);background:#e8cfae}
+.tools button.danger.active{background:var(--wax);border-color:var(--wax-bright);color:#f6e4cf}
+.tools button{width:100%;height:100%;padding:2px;font-weight:700;border-radius:7px;
+  display:flex;align-items:center;justify-content:center}
+.tools button span{display:block;font-size:15px;line-height:1}
+.tools button svg.ti{width:18px;height:18px;display:block;flex-shrink:0}
+.tools button .civ-symbol--tool{width:24px!important;height:24px!important}
+.tools button .civ-symbol--tool svg.ti{width:24px!important;height:24px!important}
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;z-index:8;left:calc(18px + var(--safe-l));top:calc(48px + var(--safe-t));
+  max-width:min(58vw,260px);transform:translateY(-8px);
+  padding:7px 12px;border:1px solid var(--gold);border-radius:9px;background:var(--parchment);
+  background-image:var(--paper-grain);color:var(--ink);font-size:11px;font-weight:500;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;box-shadow:var(--shadow-lift)
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:600px){
+  .topbar{min-height:32px;padding:calc(8px + var(--safe-t)) calc(12px + var(--safe-r)) 12px calc(12px + var(--safe-l))}
+  .brand span{font-size:9px}.stats{gap:8px;font-size:11px;padding:5px 10px}
+  .right-dock{top:calc(41px + var(--safe-t));right:calc(9px + var(--safe-r))}
+  #minimap{width:104px;height:65px}
+  .zoom-controls button{width:30px;height:30px;font-size:17px}
+  .brush-control{width:104px;padding:7px 8px}
+  .toast{left:calc(12px + var(--safe-l));top:calc(40px + var(--safe-t));max-width:min(62vw,220px);padding:6px 10px;font-size:10px}
+  .modal-overlay{padding:calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l))}
+  .modal-close-btn{top:calc(12px + var(--safe-t));right:calc(12px + var(--safe-r));width:38px;height:38px;font-size:18px}
+  .panel{width:min(94vw,560px);height:min(78vh,600px);padding:18px 18px 20px;border-radius:14px}
+  .panel h3{font-size:18px}.panel p{font-size:13.5px}
+  .tool-categories{gap:2px;padding:3px}
+  .tool-categories button{padding:4px 2px;min-width:0;font-size:7.5px}
+  .tools{gap:3px;padding:4px;grid-auto-columns:34px}
+  .tools button{width:100%;height:100%;padding:5px;border-radius:6px}
+  .tools button span{font-size:13px}
+  .tools button svg.ti{width:16px;height:16px}
+  .tools button .civ-symbol--tool{width:22px!important;height:22px!important}
+  .tools button .civ-symbol--tool svg.ti{width:22px!important;height:22px!important}
+  .paused-banner{font-size:11px;padding:6px 14px}
+}

@@ -1,0 +1,330 @@
+/* WORLD SIMULATOR — FILE RULES
+ * 1) Keep this file in the flattened project root/relative path when packaging; never add a second project-folder layer.
+ * 2) Preserve responsive/mobile layout and avoid fixed widths that can overflow the settings panel.
+ * 3) Settings choices must visually support exactly one active option per setting row.
+ * 4) Prefer reusable classes over one-off inline styles.
+ * 5) Keep this header at the top of the file when making future edits.
+ */
+
+/* Fixed-size centered popup — width/height come only from the viewport
+   (vw/vh + a px cap), never from content, so navigating between world /
+   kingdom / city / person or switching tabs never resizes the popup.
+   Anything that overflows scrolls inside .dashboard-content instead. */
+.dashboard-panel {
+  position: relative;
+  z-index: 41;
+  width: min(92vw, 720px);
+  height: min(86vh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: var(--parchment);
+  background-image: var(--paper-grain);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift), inset 0 0 0 6px #00000010, inset 0 0 0 7px var(--parchment-deep);
+  animation: dashboard-in .2s cubic-bezier(.2,.8,.3,1);
+  overflow: hidden;
+}
+
+@keyframes dashboard-in {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Breadcrumb */
+.dashboard-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--parchment-2);
+  border-bottom: 1px solid var(--panel-border);
+  font-size: 12px;
+  color: var(--ink-soft);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dashboard-breadcrumb::-webkit-scrollbar { display: none; }
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background .15s, color .15s;
+}
+
+.breadcrumb-item:hover {
+  background: #00000012;
+  color: var(--ink);
+}
+
+.breadcrumb-item.active {
+  color: var(--wax);
+  font-weight: 700;
+}
+
+.breadcrumb-separator {
+  color: #00000030;
+  user-select: none;
+}
+
+/* Dashboard header — a small title cartouche across the top of the scroll */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 3px double var(--gold);
+  background: linear-gradient(135deg, var(--wood-2), var(--wood));
+}
+
+.dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--gold-bright);
+  margin: 0;
+}
+
+.dashboard-title-icon {
+  font-size: 23px;
+}
+
+/* Tabs — bookmark-style tabs along the top of the page */
+.dashboard-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 16px;
+  background: var(--parchment-2);
+  border-bottom: 1px solid var(--panel-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dashboard-tabs::-webkit-scrollbar { display: none; }
+
+.dashboard-tab {
+  padding: 8px 15px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--parchment);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all .15s;
+}
+
+.dashboard-tab:hover {
+  background: #fff5de;
+  color: var(--ink);
+}
+
+.dashboard-tab.active {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  color: #2a1c08;
+}
+
+/* Dashboard content */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 22px;
+  -webkit-overflow-scrolling: touch;
+  color: var(--ink);
+}
+
+.dashboard-section {
+  margin-bottom: 24px;
+}
+
+.dashboard-section:last-child {
+  margin-bottom: 0;
+}
+
+.dashboard-section-title {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  padding: 14px;
+  background: #ffffff30;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 3px #00000018;
+}
+
+.stat-card-label {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.stat-card-value {
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card-icon {
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+/* List items */
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #ffffff30;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.dashboard-list-item:hover {
+  background: #fff5de;
+  border-color: var(--gold);
+}
+
+.dashboard-list-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-list-item-icon {
+  font-size: 20px;
+}
+
+.dashboard-list-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dashboard-list-item-subtitle {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.dashboard-list-item-right {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wax);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress bars */
+.progress-bar {
+  height: 10px;
+  border-radius: 99px;
+  background: #00000018;
+  overflow: hidden;
+  margin: 8px 0;
+  box-shadow: inset 0 1px 2px #00000030;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  transition: width .4s ease;
+  width: var(--pct, 0%);
+}
+
+/* Modifier: non-interactive list row (no click target) — drop the pointer
+   cursor/hover affordance that .dashboard-list-item implies by default. */
+.dashboard-list-item--static {
+  cursor: default;
+}
+
+/* Modifier: smaller value text for stat cards showing a label/name
+   (tier, dev stage, specialization) rather than a number. */
+.stat-card-value--sm {
+  font-size: .85em;
+}
+
+/* The "current / capacity" unit suffix inside a stat card value. */
+.stat-card-value-unit {
+  font-size: .6em;
+  opacity: .6;
+}
+
+/* Tighter variant of .subtle, used directly under a progress bar. */
+.subtle--tight {
+  margin: 2px 0 8px;
+}
+
+.progress-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.progress-bar-label b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Mobile: still a centered fixed-size popup, just sized for a small screen */
+@media (max-width: 768px) {
+  .dashboard-panel {
+    width: min(94vw, 720px);
+    height: min(80vh, 760px);
+    border-radius: 14px;
+  }
+
+  .dashboard-header {
+    padding: 14px 18px;
+  }
+
+  .dashboard-title {
+    font-size: 17px;
+  }
+
+  .dashboard-content {
+    padding: 16px 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
